@@ -26,7 +26,7 @@ public class UserController {
      * @return A {@link GameStatus.NEW} {@link Game} that is pending for another
      *         player to join.
      */
-    @PostMapping("/game")
+    @PostMapping("/play")
     public Game createGame() {
         System.out.println("User create a new game.");
         if (!this.session.isPlayingGame()) {
@@ -41,13 +41,15 @@ public class UserController {
      * 
      * @param code The code of the {@link Game} to join.
      */
-    @PostMapping("/game/{code}")
-    public void joinGame(@PathVariable final String code) {
+    @PostMapping("/join/{code}")
+    public Game joinGame(@PathVariable final String code) {
         try {
-            this.playground.joinNewGame(code);
+            final Game joinedGame = this.playground.joinNewGame(code);
+            this.session.setPlayedGame(joinedGame);
+            return joinedGame;
         } catch (Exception e) {
             // TODO: Cause appropriate HTTP code
-            throw new IllegalStateException("");
+            throw new IllegalArgumentException("Could not join the specified game.", e);
         }
     }
 }

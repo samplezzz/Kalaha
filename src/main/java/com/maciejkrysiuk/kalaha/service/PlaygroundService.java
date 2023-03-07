@@ -17,7 +17,7 @@ public class PlaygroundService {
 
     public Game createNewGame() {
         // TODO: Generate shorter game code
-        final Game newGame = new Game(UUID.randomUUID().toString());
+        final Game newGame = new Game(UUID.randomUUID().toString().substring(0, 5).toUpperCase());
         this.newGames.add(newGame);
         return newGame;
     }
