@@ -1,26 +1,29 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { filter, Observable, Subject, switchMap } from 'rxjs';
+import { filter, merge, Observable, Subject, switchMap } from 'rxjs';
 
 import { GameService } from '../service/game-service';
 
 @Component({ templateUrl: './start-component.html' })
 export class StartComponent {
-    pendingGameCode$: Observable<string> | undefined;
+    joinCode: string | undefined;
 
     // Events
 
-    gameAwaitingOpponent$: Observable<string>;
+    gameAwaitingOpponent$: Observable<any>;
     gameCreated$: Observable<any>;
-    gameRequested$: Subject<undefined>;
+    gameJoined$: Observable<any>;
     gameStarted$: Observable<string>;
+    requestJoinGame$: Subject<string>;
+    requestNewGame$: Subject<undefined>;
 
     constructor(private gameService: GameService, private router: Router) {
         // Wire events
 
-        this.gameRequested$ = new Subject();
+        this.requestJoinGame$ = new Subject();
+        this.requestNewGame$ = new Subject();
 
-        this.gameCreated$ = this.gameRequested$.pipe(
+        this.gameCreated$ = this.requestNewGame$.pipe(
             switchMap(() => this.gameService.createNewGame())
         );
 
@@ -32,13 +35,17 @@ export class StartComponent {
             switchMap((code) => this.gameService.awaitOpponent(code))
         );
 
+        this.gameJoined$ = this.requestJoinGame$.pipe(
+            switchMap((code) => this.gameService.joinNewGame(code))
+        );
+
         // Init actions
 
         this.initActions();
     }
 
     private initActions() {
-        this.gameStarted$.subscribe((code) =>
+        merge(this.gameStarted$, this.gameJoined$).subscribe((code) =>
             this.router.navigate(['/', code])
         );
     }

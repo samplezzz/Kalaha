@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -10,7 +11,7 @@ import { appConfig, APP_CONFIG } from './app-config';
 
 @NgModule({
     declarations: [AppComponent, StartComponent, GameComponent],
-    imports: [BrowserModule, AppRoutingModule, HttpClientModule],
+    imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule],
     providers: [
         {
             provide: APP_CONFIG,

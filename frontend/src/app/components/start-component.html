@@ -1,9 +1,32 @@
-<ng-container *ngIf="gameAwaitingOpponent$ | async as code; else intro">
+<!--
+    Awaiting own game to start
+-->
+<ng-container *ngIf="gameAwaitingOpponent$ | async as code; else start">
     Waiting for a player for your game
     <h1>{{ code }}</h1>
 </ng-container>
 
-<ng-template #intro>
-    <p><button (click)="gameRequested$.next()">Start game</button></p>
-    <p><button>Join game</button></p>
+<ng-template #start>
+    <!--
+        Joining someone's game
+    -->
+    <ng-container *ngIf="joinCode != undefined; else intro">
+        <fieldset>
+            <input type="text" [(ngModel)]="joinCode" required />
+            <button (click)="requestJoinGame$.next(joinCode)">&gt;</button>
+        </fieldset>
+        <p><a (click)="joinCode = undefined">Cancel</a></p>
+    </ng-container>
+
+    <!--
+        Intro with buttons
+    -->
+    <ng-template #intro>
+        <p>
+            <button (click)="requestNewGame$.next(undefined)">
+                Start game
+            </button>
+        </p>
+        <p><button (click)="joinCode = ''">Join game</button></p>
+    </ng-template>
 </ng-template>
