@@ -1,2 +1,9 @@
-<p><button>Start game</button></p>
-<p><button>Join game</button></p>
+<ng-container *ngIf="gameAwaitingOpponent$ | async as code; else intro">
+    Waiting for a player for your game
+    <h1>{{ code }}</h1>
+</ng-container>
+
+<ng-template #intro>
+    <p><button (click)="gameRequested$.next()">Start game</button></p>
+    <p><button>Join game</button></p>
+</ng-template>
