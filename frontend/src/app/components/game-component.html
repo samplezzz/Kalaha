@@ -1,56 +1,58 @@
-<table>
-    <tr>
-        <td rowspan="2"></td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td rowspan="2"></td>
-    </tr>
-    <tr>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-        <td>
-            ▪️▪️▪️<br />
-            ▪️▪️▪️
-        </td>
-    </tr>
-</table>
+<ng-container *ngIf="game$ | async as game">
+    <h1>turn: {{ game.turn }}</h1>
+    <table>
+        <tr>
+            <td rowspan="2"></td>
+            <td>
+                <div class="pod" (click)="move(6)">{{ game.pods[0] }}</div>
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td rowspan="2"></td>
+        </tr>
+        <tr>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+            <td>
+                ▪️▪️▪️<br />
+                ▪️▪️▪️
+            </td>
+        </tr>
+    </table>
+</ng-container>
