@@ -1,9 +1,6 @@
 package com.maciejkrysiuk.kalaha.controller;
 
-import java.util.NoSuchElementException;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,11 +20,6 @@ public class UserController {
     @Autowired
     private UserSession session;
 
-    @GetMapping("/")
-    public void init() {
-        System.out.println("New user active.");
-    }
-
     /**
      * Creates a new game owned by the requester.
      * 
@@ -45,31 +37,10 @@ public class UserController {
     }
 
     /**
-     * Returns a complete object of a {@link Game} played by the requester.
+     * Joins a {@link Game} created by other user.
      * 
-     * @param code The code of the requested game.
-     * @return Details of the requester's {@link Game}.
+     * @param code The code of the {@link Game} to join.
      */
-    @GetMapping("/game/{code}")
-    public Game getGame(@PathVariable final String code) {
-        if (this.session.isPlayingGameWithCode(code)) {
-            return this.session.getPlayedGame();
-        } else {
-            // TODO: Cause 404 NOT FOUND
-            throw new NoSuchElementException("Game not found.");
-        }
-    }
-
-    @GetMapping("/game/{code}/status")
-    public GameStatus getGameStatus(@PathVariable final String code) {
-        if (this.session.isPlayingGameWithCode(code)) {
-            return this.session.getPlayedGame().getStatus();
-        } else {
-            // TODO: Cause 404 NOT FOUND
-            throw new NoSuchElementException("Game not found.");
-        }
-    }
-
     @PostMapping("/game/{code}")
     public void joinGame(@PathVariable final String code) {
         try {
