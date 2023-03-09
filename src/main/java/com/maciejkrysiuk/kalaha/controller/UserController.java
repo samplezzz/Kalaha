@@ -10,6 +10,7 @@ import com.maciejkrysiuk.kalaha.bean.Game;
 import com.maciejkrysiuk.kalaha.bean.UserSession;
 import com.maciejkrysiuk.kalaha.service.PlaygroundService;
 import com.maciejkrysiuk.kalaha.type.GameStatus;
+import com.maciejkrysiuk.kalaha.type.PlayerRole;
 
 /**
  * API endpoint for creating and joining games.
@@ -30,11 +31,12 @@ public class UserController {
      * @return A {@link GameStatus.NEW} {@link Game} that is pending for another
      *         player to join.
      */
-    @PostMapping("/play")
+    @PostMapping("/start")
     public Game createGame() {
         if (!this.session.isPlayingGame()) {
             final Game newGame = this.playground.createNewGame();
             this.session.setPlayedGame(newGame);
+            this.session.setGameRole(newGame.getTurn());
             return newGame;
         } else {
             return this.session.getPlayedGame();
@@ -51,6 +53,7 @@ public class UserController {
         try {
             final Game joinedGame = this.playground.joinNewGame(code);
             this.session.setPlayedGame(joinedGame);
+            this.session.setGameRole(joinedGame.getTurn().equals(PlayerRole.UP) ? PlayerRole.DOWN : PlayerRole.UP);
             return joinedGame;
         } catch (Exception e) {
             // TODO: Cause appropriate HTTP code

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.maciejkrysiuk.kalaha.bean.Game;
 import com.maciejkrysiuk.kalaha.bean.UserSession;
 import com.maciejkrysiuk.kalaha.type.GameStatus;
+import com.maciejkrysiuk.kalaha.type.PlayerRole;
 
 /**
  * API endpoint for playing a {@link Game}.
@@ -38,6 +39,16 @@ public class GameController {
         }
     }
 
+    @GetMapping("/role")
+    public PlayerRole getGameRole() {
+        if (this.session.isPlayingGame()) {
+            return this.session.getGameRole();
+        } else {
+            // TODO: Cause 404 NOT FOUND
+            throw new IllegalStateException("Not playing any game at the moment.");
+        }
+    }
+
     @GetMapping("/status")
     public GameStatus getGameStatus() {
         if (this.session.isPlayingGame()) {
@@ -52,6 +63,16 @@ public class GameController {
     public Game move(@PathVariable int field) {
         if (this.session.isPlayingGame()) {
             return this.session.move(field);
+        } else {
+            // TODO: Cause 404 NOT FOUND
+            throw new IllegalStateException("Not playing any game at the moment.");
+        }
+    }
+
+    @GetMapping("/turn")
+    public PlayerRole getGameTurn() {
+        if (this.session.isPlayingGame()) {
+            return this.session.getPlayedGame().getTurn();
         } else {
             // TODO: Cause 404 NOT FOUND
             throw new IllegalStateException("Not playing any game at the moment.");

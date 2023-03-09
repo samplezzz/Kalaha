@@ -13,8 +13,16 @@ import com.maciejkrysiuk.kalaha.type.PlayerRole;
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSession {
 
+    private PlayerRole gameRole;
     private Game playedGame;
-    private PlayerRole userRole;
+
+    public PlayerRole getGameRole() {
+        return gameRole;
+    }
+
+    public void setGameRole(PlayerRole gameRole) {
+        this.gameRole = gameRole;
+    }
 
     public Game getPlayedGame() {
         return playedGame;
@@ -38,6 +46,6 @@ public class UserSession {
     }
 
     public Game move(int field) {
-        return this.playedGame.move(field, this.userRole);
+        return this.playedGame.move(field, this.gameRole);
     }
 }

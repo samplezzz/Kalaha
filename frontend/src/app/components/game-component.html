@@ -1,19 +1,35 @@
 <ng-container *ngIf="game$ | async as game">
-    <h1>turn: {{ game.turn }}</h1>
+    <h1>
+        <ng-container *ngIf="game.turn == gameService.role">it's your turn!</ng-container>
+        <ng-container *ngIf="game.turn != gameService.role">wait for opponents move...</ng-container><br />
+        <br />
+    </h1>
+    <h2>
+        <span *ngIf="gameService.role == 'UP'">you </span>
+        <span *ngIf="gameService.role == 'DOWN'">opponent </span>
+        <ng-container *ngIf="game.turn == 'UP'">🔴</ng-container>
+        <ng-container *ngIf="game.turn != 'UP'">⚫</ng-container>
+    </h2>
     <table>
         <tr>
             <td rowspan="2">
-                <div class="pod">{{ game.pods[0] }}</div>
+                <div class="pod">{{ game.pods[13] }}</div>
             </td>
-            <td *ngFor="let pod of game.pods | slice : 1 : 7; let i = index">
-                <div class="pod" (click)="move(i + 1)">{{ pod }}</div>
+            <td *ngFor="let i of upperPods">
+                <div class="pod" (click)="move(i)">{{ game.pods[i] }}</div>
             </td>
-            <td rowspan="2">{{ game.pods[7] }}</td>
+            <td rowspan="2">{{ game.pods[6] }}</td>
         </tr>
         <tr>
-            <td *ngFor="let pod of game.pods | slice : 8 : 14; let i = index">
-                <div class="pod" (click)="move(i + 8)">{{ pod }}</div>
+            <td *ngFor="let i of lowerPods">
+                <div class="pod" (click)="move(i)">{{ game.pods[i] }}</div>
             </td>
         </tr>
     </table>
+    <h2>
+        <span *ngIf="gameService.role == 'DOWN'">you </span>
+        <span *ngIf="gameService.role == 'UP'">opponent </span>
+        <ng-container *ngIf="game.turn == 'DOWN'">🔴</ng-container>
+        <ng-container *ngIf="game.turn != 'DOWN'">⚫</ng-container>
+    </h2>
 </ng-container>

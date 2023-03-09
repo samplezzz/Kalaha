@@ -8,16 +8,24 @@ import com.maciejkrysiuk.kalaha.type.PlayerRole;
  */
 public class Game implements Comparable<Game> {
 
+    private final int FIELD_SIZE = 14;
+
     private String code;
-    private int[] pods = { 0, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6 };
-    private final int FIELD_SIZE = this.pods.length;
+    private Integer[] pods;
+
+    public void setPods(Integer[] pods) {
+        this.pods = pods;
+    }
+
     private GameStatus status;
     private PlayerRole turn;
 
     public Game(String code) {
         // TODO: Add assertion for not null.
         this.code = code;
+        this.pods = new Integer[] { 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 0 };
         this.status = GameStatus.NEW;
+        this.turn = PlayerRole.DOWN;
     }
 
     /*
@@ -28,8 +36,12 @@ public class Game implements Comparable<Game> {
         return this.code;
     }
 
+    public Integer[] getPods() {
+        return this.pods;
+    }
+
     public PlayerRole getTurn() {
-        return turn;
+        return this.turn;
     }
 
     /*
