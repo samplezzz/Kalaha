@@ -11,6 +11,10 @@ import com.maciejkrysiuk.kalaha.bean.Game;
 import com.maciejkrysiuk.kalaha.bean.UserSession;
 import com.maciejkrysiuk.kalaha.type.GameStatus;
 
+/**
+ * API endpoint for playing a {@link Game}.
+ * 
+ */
 @RestController()
 @RequestMapping("/game")
 public class GameController {

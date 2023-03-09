@@ -9,5 +9,5 @@ export const APP_CONFIG = new InjectionToken<AppConfig>(
 );
 
 export const appConfig: AppConfig = {
-    backendUrl: `http://127.0.0.1:8080`,
+    backendUrl: `http://localhost:8080`,
 };

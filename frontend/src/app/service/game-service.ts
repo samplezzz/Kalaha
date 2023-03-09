@@ -1,14 +1,33 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { filter, interval, Observable, Subject, switchMap, take } from 'rxjs';
+import {
+    filter,
+    interval,
+    Observable,
+    map,
+    ReplaySubject,
+    switchMap,
+    take,
+    tap,
+    timeout,
+} from 'rxjs';
 
 import { AppConfig, APP_CONFIG } from '../app-config';
+
+export type Game = {
+    code: string;
+    pods: number[];
+    status: 'NEW' | 'PLAYING' | 'FINISHED' | 'ABORTED';
+    turn: 'UP' | 'DOWN';
+};
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameService {
-    private _game$: Subject<any> = new Subject();
+    public readonly AWAIT_OPPONENT_MAXTIME = 1000 * 60 * 5;
+
+    public _game$: ReplaySubject<Game> = new ReplaySubject(1);
     game$ = this._game$.asObservable();
 
     constructor(
@@ -16,32 +35,55 @@ export class GameService {
         private httpClient: HttpClient
     ) {}
 
-    public createNewGame(): Observable<any> {
-        return this.httpClient.post(`${this.conf.backendUrl}/user/play`, {});
-    }
-
-    public joinNewGame(code: string): Observable<any> {
-        return this.httpClient.post(
-            `${this.conf.backendUrl}/user/join/${code}`,
-            {}
-        );
-    }
-
-    public awaitOpponent(code: string): Observable<any> {
+    public awaitOpponent(): Observable<Game> {
         return interval(1000).pipe(
             switchMap(() =>
-                this.httpClient.get(`${this.conf.backendUrl}/game/status`)
+                this.httpClient.get(`${this.conf.backendUrl}/game/status`, {
+                    withCredentials: true,
+                })
             ),
             filter((status) => status == 'PLAYING'),
-            take(1)
+            switchMap(() =>
+                this.httpClient.get<Game>(`${this.conf.backendUrl}/game`, {
+                    withCredentials: true,
+                })
+            ),
+            tap((game) => this._game$.next(game)),
+            take(1),
+            timeout(this.AWAIT_OPPONENT_MAXTIME)
         );
     }
 
-    public move(fromField: number) {
-        this.httpClient
-            .post(`${this.conf.backendUrl}/game/move`, {
-                from: fromField,
-            })
-            .subscribe((game) => this._game$.next(game));
+    public createNewGame(): Observable<Game> {
+        return this.httpClient.post<Game>(
+            `${this.conf.backendUrl}/user/play`,
+            {},
+            { withCredentials: true }
+        );
+    }
+
+    public joinNewGame(code: string): Observable<string> {
+        return this.httpClient
+            .post<Game>(
+                `${this.conf.backendUrl}/user/join/${code}`,
+                {},
+                { withCredentials: true }
+            )
+            .pipe(
+                tap((game) => this._game$.next(game)),
+                map((game) => game.code)
+            );
+    }
+
+    public move(field: number): Observable<Game> {
+        return this.httpClient
+            .post<Game>(
+                `${this.conf.backendUrl}/game/move/${field}`,
+                {},
+                {
+                    withCredentials: true,
+                }
+            )
+            .pipe(tap((game) => this._game$.next(game)));
     }
 }
