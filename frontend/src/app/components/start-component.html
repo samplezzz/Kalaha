@@ -1,9 +1,9 @@
 <!--
     Awaiting own game to start
 -->
-<ng-container *ngIf="gameAwaitingOpponent$ | async as code; else start">
+<ng-container *ngIf="gameAwaitingOpponent$ | async as newGame; else start">
     Waiting for a player for your game
-    <h1>{{ code }}</h1>
+    <h1>{{ newGame.code }}</h1>
 </ng-container>
 
 <ng-template #start>
@@ -23,10 +23,11 @@
     -->
     <ng-template #intro>
         <p>
-            <button (click)="requestNewGame$.next(undefined)">
-                Start game
-            </button>
+            <button (click)="requestNewGame$.next()">Start game</button>
         </p>
         <p><button (click)="joinCode = ''">Join game</button></p>
+        <p>
+            <button (click)="test()">Test</button>
+        </p>
     </ng-template>
 </ng-template>

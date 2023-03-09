@@ -31,7 +31,7 @@ public class PlaygroundService {
     public Game joinNewGame(String code) {
         final Game joinedGame = this.findNewGame(code);
         if (this.newGames.remove(joinedGame)) {
-            joinedGame.setStatus(GameStatus.PLAYED);
+            joinedGame.setStatus(GameStatus.PLAYING);
             // TODO: The creator of the game needs to be notified at this point.
             return joinedGame;
         } else {

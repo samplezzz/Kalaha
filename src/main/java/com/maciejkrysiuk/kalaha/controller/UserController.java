@@ -11,6 +11,10 @@ import com.maciejkrysiuk.kalaha.bean.UserSession;
 import com.maciejkrysiuk.kalaha.service.PlaygroundService;
 import com.maciejkrysiuk.kalaha.type.GameStatus;
 
+/**
+ * API endpoint for creating and joining games.
+ * 
+ */
 @RestController()
 @RequestMapping("/user")
 public class UserController {
@@ -28,9 +32,10 @@ public class UserController {
      */
     @PostMapping("/play")
     public Game createGame() {
-        System.out.println("User create a new game.");
         if (!this.session.isPlayingGame()) {
-            return this.playground.createNewGame();
+            final Game newGame = this.playground.createNewGame();
+            this.session.setPlayedGame(newGame);
+            return newGame;
         } else {
             return this.session.getPlayedGame();
         }

@@ -2,56 +2,17 @@
     <h1>turn: {{ game.turn }}</h1>
     <table>
         <tr>
-            <td rowspan="2"></td>
-            <td>
-                <div class="pod" (click)="move(6)">{{ game.pods[0] }}</div>
+            <td rowspan="2">
+                <div class="pod">{{ game.pods[0] }}</div>
             </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
+            <td *ngFor="let pod of game.pods | slice : 1 : 7; let i = index">
+                <div class="pod" (click)="move(i + 1)">{{ pod }}</div>
             </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td rowspan="2"></td>
+            <td rowspan="2">{{ game.pods[7] }}</td>
         </tr>
         <tr>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
-            </td>
-            <td>
-                ▪️▪️▪️<br />
-                ▪️▪️▪️
+            <td *ngFor="let pod of game.pods | slice : 8 : 14; let i = index">
+                <div class="pod" (click)="move(i + 8)">{{ pod }}</div>
             </td>
         </tr>
     </table>

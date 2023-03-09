@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { filter, merge, Observable, Subject, switchMap } from 'rxjs';
+import { filter, map, merge, Observable, Subject, switchMap } from 'rxjs';
 
-import { GameService } from '../service/game-service';
+import { Game, GameService } from '../service/game-service';
 
 @Component({ templateUrl: './start-component.html' })
 export class StartComponent {
@@ -10,12 +10,12 @@ export class StartComponent {
 
     // Events
 
-    gameAwaitingOpponent$: Observable<any>;
-    gameCreated$: Observable<any>;
-    gameJoined$: Observable<any>;
-    gameStarted$: Observable<string>;
+    gameAwaitingOpponent$: Observable<Game>;
+    gameCreated$: Observable<Game>;
+    gameJoined$: Observable<string>;
+    gameStarted$: Observable<Game>;
     requestJoinGame$: Subject<string>;
-    requestNewGame$: Subject<undefined>;
+    requestNewGame$: Subject<void>;
 
     constructor(private gameService: GameService, private router: Router) {
         // Wire events
@@ -32,7 +32,7 @@ export class StartComponent {
         );
 
         this.gameStarted$ = this.gameAwaitingOpponent$.pipe(
-            switchMap((code) => this.gameService.awaitOpponent(code))
+            switchMap(() => this.gameService.awaitOpponent())
         );
 
         this.gameJoined$ = this.requestJoinGame$.pipe(
@@ -45,8 +45,19 @@ export class StartComponent {
     }
 
     private initActions() {
-        merge(this.gameStarted$, this.gameJoined$).subscribe((code) =>
-            this.router.navigate(['/', code])
-        );
+        merge(
+            this.gameStarted$.pipe(map((game) => game.code)),
+            this.gameJoined$
+        ).subscribe((code) => this.router.navigate([code]));
+    }
+
+    test() {
+        this.gameService._game$.next({
+            code: 'XYZ',
+            pods: [0, 11, 12, 13, 14, 15, 16, 0, 21, 22, 23, 24, 25, 26],
+            status: 'PLAYING',
+            turn: 'DOWN',
+        });
+        this.router.navigate(['XYZ']);
     }
 }

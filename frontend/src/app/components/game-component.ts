@@ -15,6 +15,6 @@ export class GameComponent {
     }
 
     move(fromField: number) {
-        this.gameService.move(fromField);
+        this.gameService.move(fromField).subscribe();
     }
 }
