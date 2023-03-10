@@ -24,10 +24,12 @@ const _ = {
 
 export type PlayerRole = 'UP' | 'DOWN';
 
+export type GameStatus = 'NEW' | 'PLAYING' | 'FINISHED' | 'ABORTED';
+
 export type Game = {
     code: string;
     pods: number[];
-    status: 'NEW' | 'PLAYING' | 'FINISHED' | 'ABORTED';
+    status: GameStatus;
     turn: PlayerRole;
 };
 
@@ -35,7 +37,8 @@ export type Game = {
     providedIn: 'root',
 })
 export class GameService {
-    public readonly AWAIT_OPPONENT_MAXTIME = 1000 * 60 * 5;
+    public static readonly AWAIT_OPPONENT_MAXTIME = 1000 * 60 * 5;
+    public static readonly POLLING_TIME = 3000;
 
     public _game$ = new BehaviorSubject<Game | undefined>(undefined);
     game$ = this._game$.asObservable();
@@ -45,26 +48,20 @@ export class GameService {
     constructor(@Inject(APP_CONFIG) private conf: AppConfig, private httpClient: HttpClient) {}
 
     public awaitOpponent(): Observable<Game> {
-        return interval(5000).pipe(
+        return interval(GameService.POLLING_TIME).pipe(
             switchMap(() => this.httpClient.get<string>(`${this.conf.backendUrl}/game/status`, _)),
             filter((status) => status == 'PLAYING'),
 
             take(1),
-            timeout(this.AWAIT_OPPONENT_MAXTIME),
+            timeout(GameService.AWAIT_OPPONENT_MAXTIME),
 
             this.initRole('DOWN'),
             this.forceUpdateGame()
         );
     }
 
-    public continueGame(): Observable<Game> {
-        return of(undefined).pipe(
-            this.initRole(),
-            this.forceUpdateGame(),
-            tap((game) => {
-                console.debug('Continue existing game', game);
-            })
-        );
+    public continueRemoteGame(): Observable<Game> {
+        return of(undefined).pipe(this.initRole(), this.forceUpdateGame());
     }
 
     public createNewGame(): Observable<Game> {
@@ -82,7 +79,7 @@ export class GameService {
     }
 
     public waitForMove() {
-        return interval(5000).pipe(
+        return interval(GameService.POLLING_TIME).pipe(
             switchMap(() => this.httpClient.get<string>(`${this.conf.backendUrl}/game/turn`, _)),
             filter((turn) => turn == this.role),
             take(1),

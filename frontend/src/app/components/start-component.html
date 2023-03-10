@@ -1,33 +1,35 @@
-<!--
-    Awaiting own game to start
--->
-<ng-container *ngIf="gameAwaitingOpponent$ | async as newGame; else start">
-    Waiting for a player for your game
-    <h1>{{ newGame.code }}</h1>
-</ng-container>
-
-<ng-template #start>
+<h1>Kalaha</h1>
+<ng-container *ngIf="inited$ | async; else loading">
     <!--
-        Joining someone's game
+        Awaiting own game to start
     -->
-    <ng-container *ngIf="joinCode != undefined; else intro">
-        <fieldset>
-            <input type="text" [(ngModel)]="joinCode" required />
-            <button (click)="requestJoinGame$.next(joinCode)">&gt;</button>
-        </fieldset>
-        <p><a (click)="joinCode = undefined">Cancel</a></p>
+    <ng-container *ngIf="gameAwaitingOpponent$ | async as newGame; else start">
+        Waiting for a player for your game
+        <h1 test-new-game-code>{{ newGame.code }}</h1>
     </ng-container>
 
-    <!--
-        Intro with buttons
-    -->
-    <ng-template #intro>
-        <p>
-            <button (click)="requestNewGame$.next()">Start game</button>
-        </p>
-        <p><button (click)="joinCode = ''">Join game</button></p>
-        <p>
-            <button (click)="test()">Test</button>
-        </p>
+    <ng-template #start>
+        <!--
+            Joining someone's game
+        -->
+        <ng-container *ngIf="joinCode != undefined; else intro">
+            <fieldset>
+                <input type="text" [(ngModel)]="joinCode" required />
+                <button (click)="requestJoinGame$.next(joinCode)">&gt;</button>
+            </fieldset>
+            <p><a (click)="joinCode = undefined">Cancel</a></p>
+        </ng-container>
+
+        <!--
+            Intro with buttons
+        -->
+        <ng-template #intro>
+            <p>
+                <button (click)="requestNewGame$.next()">Start game</button>
+            </p>
+            <p><button (click)="joinCode = ''">Join game</button></p>
+        </ng-template>
     </ng-template>
-</ng-template>
+</ng-container>
+
+<ng-template #loading><h2>initializing the app...</h2></ng-template>
