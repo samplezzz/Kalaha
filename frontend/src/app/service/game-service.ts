@@ -81,6 +81,7 @@ export class GameService {
     public waitForMove() {
         return interval(GameService.POLLING_TIME).pipe(
             switchMap(() => this.httpClient.get<string>(`${this.conf.backendUrl}/game/turn`, _)),
+            // TODO: check current game's last move sequence and, if incremented, trigger the game update
             filter((turn) => turn == this.role),
             take(1),
             this.forceUpdateGame()

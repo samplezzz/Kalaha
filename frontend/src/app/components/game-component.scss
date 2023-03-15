@@ -1,3 +1,5 @@
+@import '../../variables';
+
 table {
 }
 
@@ -9,6 +11,53 @@ td {
     width: 3em;
 }
 
-.pod {
-    cursor: pointer;
+.pods {
+    display: flex;
+    height: 70px;
+    overflow: visible;
+
+    justify-content: center;
+
+    .top & {
+        align-items: flex-start;
+        transform: translateX(calc(-20px - .5em));
+    }
+
+    .bottom & {
+        align-items: flex-end;
+        transform: translateX(calc(20px + .5em));
+    }
+
+    .pod {
+        background: white;
+        border-radius: 20px;
+        color: black;
+        cursor: not-allowed;
+        display: inline-flex;
+        height: 70px;
+        margin: 0 .5em;
+        width: 45px;
+
+        align-items: center;
+        justify-content: center;
+
+        transition: .1s ease-in-out;
+
+        &.actionable {
+            cursor: pointer;
+            outline: $color-accent 4px solid;
+
+            &:hover {
+                background-color: rgb(255, 234, 234);
+            }
+        }
+
+        &.big {
+            height: calc(140px + 2em);
+        }
+
+        &.empty {
+            color: white;
+        }
+    }
 }

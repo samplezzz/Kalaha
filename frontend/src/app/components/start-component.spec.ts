@@ -1,34 +1,28 @@
 import { Location } from '@angular/common';
 import { Component } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { RouterTestingModule } from '@angular/router/testing';
-import { BehaviorSubject, defer, of, Subject, throwError } from 'rxjs';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { BehaviorSubject, Subject, throwError } from 'rxjs';
 
-import { Game, GameService, GameStatus } from '../service/game-service';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+
+import { Game, GameService } from '../service/game-service';
 import { StartComponent } from './start-component';
 
 describe('StartComponent', () => {
     let fixture: ComponentFixture<StartComponent>, component: StartComponent, location: Location;
 
-    // mocks
+    // Mocks
 
-    let mockGameState$: BehaviorSubject<Game | undefined>, mockRemoteOpponent$: Subject<Game>;
-
-    beforeEach(() => {
-        mockGameState$ = new BehaviorSubject<Game | undefined>(undefined);
-        mockRemoteOpponent$ = new Subject<Game>();
-    });
-
-    let spyGameAPI: any, spyCreateGameAPI: any, spyJoinGameAPI: any;
+    let mockGameState$: BehaviorSubject<Game | undefined> = new BehaviorSubject<Game | undefined>(undefined),
+        mockRemoteOpponent$: Subject<Game> = new Subject<Game>(),
+        mockRemoteExistingGame$: Subject<Game> = new Subject<Game>(),
+        mockRemoteGameCreated$: Subject<Game> = new Subject<Game>(),
+        mockRemoteGameJoined$: Subject<Game> = new Subject<Game>();
 
     beforeEach(() => {
-        spyCreateGameAPI = jasmine.createSpyObj('API/user/start', ['POST']);
-        spyCreateGameAPI.POST.and.returnValue({ code: 'CREATED-GAME', status: 'NEW' });
-        spyGameAPI = jasmine.createSpyObj('API/game', ['GET']);
-        spyGameAPI.GET.and.returnValue({ code: 'REMOTE-GAME' });
-        spyJoinGameAPI = jasmine.createSpyObj('API/user/join', ['POST']);
-        spyJoinGameAPI.POST.and.returnValue({ code: 'JOINED-GAME' });
+        mockGameState$.next(undefined);
     });
 
     let spyGameService: any;
@@ -43,17 +37,20 @@ describe('StartComponent', () => {
 
         spyGameService.game$ = mockGameState$;
 
-        spyGameService.awaitOpponent.and.returnValue(defer(() => mockRemoteOpponent$));
-        spyGameService.continueRemoteGame.and.returnValue(defer(() => of(spyGameAPI.GET())));
-        spyGameService.createNewGame.and.returnValue(defer(() => of(spyCreateGameAPI.POST())));
-        spyGameService.joinNewGame.and.returnValue(defer(() => of(spyJoinGameAPI.POST())));
+        spyGameService.awaitOpponent.and.returnValue(mockRemoteOpponent$);
+        spyGameService.continueRemoteGame.and.returnValue(mockRemoteExistingGame$);
+        spyGameService.createNewGame.and.returnValue(mockRemoteGameCreated$);
+        spyGameService.joinNewGame.and.returnValue(mockRemoteGameJoined$);
     });
 
-    // test bed
+    // Test bed
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [RouterTestingModule.withRoutes([{ path: 'game', component: MockGameComponent }])],
+            imports: [
+                NoopAnimationsModule,
+                RouterTestingModule.withRoutes([{ path: 'game', component: MockGameComponent }]),
+            ],
             declarations: [StartComponent],
             providers: [
                 {
@@ -64,7 +61,7 @@ describe('StartComponent', () => {
         }).compileComponents();
     });
 
-    // tests
+    // Tests
 
     it('should create the Start Component', () => {
         initComponent();
@@ -74,13 +71,10 @@ describe('StartComponent', () => {
     it('should be able to continue a game existing in the state', fakeAsync(() => {
         mockGameState$.next({ code: 'IN-STATE-GAME', pods: [], status: 'PLAYING', turn: 'DOWN' });
         initComponent();
-
-        expect(location.path()).toBe('');
-
         fixture.detectChanges();
 
+        expect(location.path()).toBe('');
         expect(spyGameService.continueRemoteGame).toHaveBeenCalled();
-        expect(spyGameAPI.GET).not.toHaveBeenCalled();
 
         tick();
 
@@ -89,14 +83,12 @@ describe('StartComponent', () => {
 
     it('should be able to continue a game existing on the backend', fakeAsync(() => {
         initComponent();
-
-        expect(location.path()).toBe('');
-
         fixture.detectChanges();
 
+        expect(location.path()).toBe('');
         expect(spyGameService.continueRemoteGame).toHaveBeenCalled();
-        expect(spyGameAPI.GET).toHaveBeenCalled();
 
+        mockRemoteExistingGame$.next({ code: 'REMOTE-EXISTING-GAME', status: 'PLAYING', pods: [], turn: 'DOWN' });
         tick();
 
         expect(location.path()).toBe('/game');
@@ -109,53 +101,56 @@ describe('StartComponent', () => {
 
         it('should offer starting/joining a new game when no existing games are found', fakeAsync(() => {
             initComponent();
-
-            expect(location.path()).toBe('');
-
             fixture.detectChanges();
 
-            expect(fixture.debugElement.query(By.css('h2')).nativeElement.textContent).toBe('initializing the app...');
-            expect(spyGameService.continueRemoteGame).toHaveBeenCalled();
-            expect(spyGameAPI.GET).not.toHaveBeenCalled();
+            let viewSnapshot = view();
 
-            tick();
-            fixture.detectChanges();
-
-            expect(location.path()).toBe('');
-
-            const buttons = fixture.debugElement.queryAll(By.css('button'));
-            expect(buttons.length).toBe(2);
-            expect(buttons[0].nativeElement.textContent).toBe('Start game');
-            expect(buttons[1].nativeElement.textContent).toBe('Join game');
+            expect(spyGameService.continueRemoteGame)
+                .withContext(
+                    "Should have called for backend's game status because frontend's game state was undefined."
+                )
+                .toHaveBeenCalled();
+            expect(viewSnapshot.startButton).withContext('Should display the Start button.').toBeDefined();
+            expect(viewSnapshot.startButton.nativeElement.textContent)
+                .withContext('Should display the Start button.')
+                .toBe('Start game');
+            expect(viewSnapshot.joinButton).withContext('Should display the Join button').toBeDefined();
+            expect(viewSnapshot.joinButton.nativeElement.textContent)
+                .withContext('Should display the Join button')
+                .toBe('Join game');
         }));
 
         it('should be able to start a new game', fakeAsync(() => {
             initComponent();
             fixture.detectChanges();
-            expect(location.path()).toBe('');
-
-            tick();
-            fixture.detectChanges();
 
             let viewSnapshot = view();
 
             viewSnapshot.startButton.nativeElement.click();
-
             tick();
 
-            expect(spyCreateGameAPI.POST).toHaveBeenCalled();
+            mockRemoteGameCreated$.next({ code: 'CREATED-GAME', status: 'NEW', pods: [], turn: 'DOWN' });
+            tick();
 
             fixture.detectChanges();
-
             viewSnapshot = view();
 
-            expect(viewSnapshot.newGameCode).toBeDefined();
-            expect(viewSnapshot.newGameCode.nativeElement.textContent).toBe('CREATED-GAME');
+            expect(viewSnapshot.newGameCode)
+                .withContext('Should display the new game code after creating a game.')
+                .toBeDefined();
+            expect(viewSnapshot.newGameCode.nativeElement.textContent)
+                .withContext('Displayed code should equal the code returned by the API.')
+                .toBe('CREATED-GAME');
+            expect(location.path())
+                .withContext('Should stay on start page while the game has not changed its status to PLAYING.')
+                .toBe('');
 
             mockRemoteOpponent$.next({ code: 'CREATED-GAME', pods: [], status: 'PLAYING', turn: 'DOWN' });
             tick();
 
-            expect(location.path()).toBe('/game');
+            expect(location.path())
+                .withContext('Should navigate to /game after a created game changed status to PLAYING')
+                .toBe('/game');
         }));
     });
 

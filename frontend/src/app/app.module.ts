@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -11,7 +12,7 @@ import { appConfig, APP_CONFIG } from './app-config';
 
 @NgModule({
     declarations: [AppComponent, StartComponent, GameComponent],
-    imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule],
+    imports: [BrowserAnimationsModule, BrowserModule, AppRoutingModule, FormsModule, HttpClientModule],
     providers: [
         {
             provide: APP_CONFIG,

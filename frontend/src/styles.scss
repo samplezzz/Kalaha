@@ -1,16 +1,91 @@
+@import 'variables';
+
 html {
-    font-size: 12px;
+    color: white;
+    font-family: 'Golos Text', sans-serif;
+    font-size: 16px;
     height: 100%;
+    font-weight: 500;
 }
 
 body {
     display: flex;
+    flex-flow: column;
     height: 100%;
     margin: 0;
     padding: 0;
 
     align-items: center;
     justify-content: center;
+    position: relative;
 
     text-align: center;
+}
+
+.half {
+    display: flex;
+    flex-flow: column;
+    height: 50vh;
+    padding: 1em;
+    width: 100vh;  
+}
+
+.top {
+    background-color: $color-theme-1;
+    justify-content: flex-end;
+}
+
+.bottom {
+    background-color: $color-theme-2;
+    justify-content: flex-start;
+}
+
+h1 {
+    margin: 1rem 0;
+}
+
+h2 {
+    letter-spacing: 2px;
+}
+
+button {
+    background: $color-accent;
+    border: none;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 15%);
+    display: inline-block;
+    min-width: 135px;
+    padding: 12px;
+
+    color: white;
+    font-weight: bold;
+    letter-spacing: 1px;
+
+    transition: .1s ease-in-out;
+
+    &:hover {
+        transform: translate(0,-2px);
+    }
+}
+
+fieldset {
+    border: none;
+    margin: 1em;
+    padding: 0;
+}
+
+input {
+    padding: 12px;
+    background-color: #fff;
+    border: none;
+    border-radius: 2px;
+    margin: 0 1em 0 0;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.highligthed {
+    color: $color-accent;
 }

@@ -1,3 +1,11 @@
+@import '../../animations';
+
 h1 {
+    font-family: 'Luckiest Guy', cursive;
     font-size: 5rem;
+    font-weight: 400;
+}
+
+#init-message {
+    animation: text-down 1s;
 }

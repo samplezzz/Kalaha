@@ -1,35 +1,48 @@
-<h1>Kalaha</h1>
-<ng-container *ngIf="inited$ | async; else loading">
-    <!--
-        Awaiting own game to start
-    -->
-    <ng-container *ngIf="gameAwaitingOpponent$ | async as newGame; else start">
-        Waiting for a player for your game
-        <h1 test-new-game-code>{{ newGame.code }}</h1>
-    </ng-container>
-
-    <ng-template #start>
+<div class="top half">
+    <h1>Kalaha</h1>
+</div>
+<div class="bottom half">
+    <ng-container *ngIf="inited$ | async; else loading">
         <!--
-            Joining someone's game
+            Awaiting own game to start
         -->
-        <ng-container *ngIf="joinCode != undefined; else intro">
-            <fieldset>
-                <input type="text" [(ngModel)]="joinCode" required />
-                <button (click)="requestJoinGame$.next(joinCode)">&gt;</button>
-            </fieldset>
-            <p><a (click)="joinCode = undefined">Cancel</a></p>
+        <ng-container *ngIf="gameRequiringAnOpponent$ | async as newGame; else start">
+            <p class="pulsate">waiting for an opponent to join your game...</p>
+            <h1 test-new-game-code>{{ newGame.code }}</h1>
+            <p><a (click)="abortGame()">cancel</a></p>
         </ng-container>
 
-        <!--
-            Intro with buttons
-        -->
-        <ng-template #intro>
-            <p>
-                <button (click)="requestNewGame$.next()">Start game</button>
-            </p>
-            <p><button (click)="joinCode = ''">Join game</button></p>
-        </ng-template>
-    </ng-template>
-</ng-container>
+        <ng-template #start>
+            <!--
+                Joining someone's game
+            -->
+            <ng-container *ngIf="joinCode != undefined; else intro">
+                <fieldset>
+                    <input
+                        #joinCodeInput
+                        type="text"
+                        required
+                        [(ngModel)]="joinCode"
+                        (keydown.enter)="requestJoinGame$.next(joinCode)"
+                    />
+                    <button (click)="requestJoinGame$.next(joinCode)">Go</button>
+                </fieldset>
+                <p><a (click)="joinCode = undefined">cancel</a></p>
+            </ng-container>
 
-<ng-template #loading><h2>initializing the app...</h2></ng-template>
+            <!--
+                Intro with buttons
+            -->
+            <ng-template #intro>
+                <div @main>
+                    <p>
+                        <button (click)="requestNewGame$.next()">Start game</button>
+                    </p>
+                    <p><button (click)="joinCode = ''">Join game</button></p>
+                </div>
+            </ng-template>
+        </ng-template>
+    </ng-container>
+
+    <ng-template #loading><p id="init-message">initializing the app...</p></ng-template>
+</div>
