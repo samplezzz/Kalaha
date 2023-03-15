@@ -1,44 +1,44 @@
 <ng-container *ngIf="game$ | async as game">
     <div class="top half">
-        <p *ngIf="gameService.role == 'UP'">
-            <ng-container *ngIf="game.turn == gameService.role">it's your turn!</ng-container>
-            <ng-container *ngIf="game.turn != gameService.role">wait for the opponent's move...</ng-container><br />
-            <br />
-        </p>
-        <h2 [ngClass]="{ highligthed: game.turn == 'UP' }">
-            <span *ngIf="gameService.role == 'UP'">you </span>
-            <span *ngIf="gameService.role == 'DOWN'">opponent </span>
-        </h2>
+        <p>-= {{ gameService.role }} =-</p>
+        <ng-container *ngTemplateOutlet="prompt; context: { game, role: 'UP' }"></ng-container>
+        <ng-container *ngTemplateOutlet="player; context: { game, role: 'UP' }"></ng-container>
         <div class="pods">
-            <div [ngClass]="{ pod: true, big: true, empty: game.pods[13] == 0 }">{{ game.pods[13] }}</div>
-            <div
-                *ngFor="let i of upperPods"
-                [ngClass]="{ pod: true, actionable: gameService.role == 'UP' && game.turn == 'UP' && game.pods[i] != 0, empty: game.pods[i] == 0 }"
-                (click)="move(i)"
-            >
-                {{ game.pods[i] }}
-            </div>
+            <div [ngClass]="{ big: true, pod: true, empty: game.pods[13] == 0 }">{{ game.pods[13] }}</div>
+            <ng-container *ngTemplateOutlet="pods; context: { game, role: 'UP', pods: upperPods }"></ng-container>
         </div>
     </div>
     <div class="bottom half">
         <div class="pods">
-            <div
-                *ngFor="let i of lowerPods"
-                [ngClass]="{ pod: true, actionable: gameService.role == 'DOWN' && game.turn == 'DOWN' && game.pods[i] != 0, empty: game.pods[i] == 0 }"
-                (click)="move(i)"
-            >
-                {{ game.pods[i] }}
-            </div>
-            <div [ngClass]="{ pod: true, big: true, empty: game.pods[6] == 0 }">{{ game.pods[6] }}</div>
+            <ng-container *ngTemplateOutlet="pods; context: { game, role: 'DOWN', pods: lowerPods }"></ng-container>
+            <div [ngClass]="{ big: true, pod: true, empty: game.pods[6] == 0 }">{{ game.pods[6] }}</div>
         </div>
-        <h2 [ngClass]="{ highligthed: game.turn == 'DOWN' }">
-            <span *ngIf="gameService.role == 'DOWN'">you</span>
-            <span *ngIf="gameService.role == 'UP'">opponent</span>
-        </h2>
-        <p *ngIf="gameService.role == 'DOWN'">
-            <ng-container *ngIf="game.turn == gameService.role">it's your turn!</ng-container>
-            <ng-container *ngIf="game.turn != gameService.role">wait for opponents move...</ng-container><br />
-            <br />
-        </p>
+        <ng-container *ngTemplateOutlet="player; context: { game, role: 'DOWN' }"></ng-container>
+        <ng-container *ngTemplateOutlet="prompt; context: { game, role: 'DOWN' }"></ng-container>
     </div>
 </ng-container>
+
+<ng-template #player let-game="game" let-role="role">
+    <h2 [ngClass]="{ highligthed: game.turn == role }">
+        <span *ngIf="gameService.role == role">you</span>
+        <span *ngIf="gameService.role != role">opponent</span>
+    </h2>
+</ng-template>
+
+<ng-template #prompt let-game="game" let-role="role">
+    <p *ngIf="gameService.role == role" class="pulsate">
+        <ng-container *ngIf="game.turn == gameService.role">it's your turn!</ng-container>
+        <ng-container *ngIf="game.turn != gameService.role">wait for opponents move...</ng-container><br />
+        <br />
+    </p>
+</ng-template>
+
+<ng-template #pods let-game="game" let-pods="pods" let-role="role">
+    <div
+        *ngFor="let i of pods"
+        [ngClass]="{ pod: true, actionable: gameService.role == role && game.turn == role && game.pods[i] != 0, empty: game.pods[i] == 0 }"
+        (click)="gameService.role == role && move(i)"
+    >
+        {{ game.pods[i] }}
+    </div>
+</ng-template>

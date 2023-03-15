@@ -1,0 +1,28 @@
+@keyframes text-down {
+    from {
+        opacity: 0;
+        transform: translateY(-.5em);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulsate {
+    0% {
+        opacity: .3;
+    }
+    15% {
+        opacity: .7;
+    }
+    50% {
+        opacity: 1;
+    }
+    85% {
+        opacity: .7;
+    }
+    100% {
+        opacity: .3;
+    }
+}

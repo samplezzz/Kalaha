@@ -20,6 +20,7 @@ import {
 import { Game, GameService } from '../service/game-service';
 
 @Component({
+    host: { class: 'page' },
     templateUrl: './start-component.html',
     styleUrls: ['./start-component.scss'],
     animations: startAnimations(),
@@ -61,8 +62,7 @@ export class StartComponent implements OnInit {
         );
         this.gameRequiringAnOpponent$ = merge(
             this.gameCreated$,
-            this.existingGame$.pipe(filter((game) => game.status == 'NEW')),
-            this.gameService.game$.pipe(filter((game) => !game))
+            this.existingGame$.pipe(filter((game) => game.status == 'NEW'))
         );
         this.gameStarted$ = this.gameRequiringAnOpponent$.pipe(
             switchMap(() => this.gameService.awaitOpponent()),
@@ -85,10 +85,6 @@ export class StartComponent implements OnInit {
     @ViewChild('joinCodeInput')
     set joinCodeInput(el: ElementRef) {
         el?.nativeElement.focus();
-    }
-
-    abortGame() {
-        this.gameService.reset();
     }
 
     private initActions() {

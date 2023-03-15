@@ -9,7 +9,6 @@
         <ng-container *ngIf="gameRequiringAnOpponent$ | async as newGame; else start">
             <p class="pulsate">waiting for an opponent to join your game...</p>
             <h1 test-new-game-code>{{ newGame.code }}</h1>
-            <p><a (click)="abortGame()">cancel</a></p>
         </ng-container>
 
         <ng-template #start>

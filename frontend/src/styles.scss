@@ -1,25 +1,27 @@
+@import 'animations';
 @import 'variables';
 
 html {
     color: white;
     font-family: 'Golos Text', sans-serif;
     font-size: 16px;
-    height: 100%;
     font-weight: 500;
 }
 
 body {
-    display: flex;
-    flex-flow: column;
-    height: 100%;
     margin: 0;
     padding: 0;
 
+    text-align: center;
+}
+
+.page {
+    display: flex;
+    flex-flow: column;
+    height: 100vh;
+
     align-items: center;
     justify-content: center;
-    position: relative;
-
-    text-align: center;
 }
 
 .half {
@@ -27,7 +29,7 @@ body {
     flex-flow: column;
     height: 50vh;
     padding: 1em;
-    width: 100vh;  
+    width: 100vw;  
 }
 
 .top {
@@ -88,4 +90,8 @@ input {
 
 .highligthed {
     color: $color-accent;
+}
+
+.pulsate {
+    animation: pulsate 2s linear infinite;
 }

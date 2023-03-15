@@ -5,6 +5,7 @@ import { EMPTY, first, Observable, partition, switchMap } from 'rxjs';
 import { GameService } from '../service/game-service';
 
 @Component({
+    host: { class: 'page' },
     templateUrl: './game-component.html',
     styleUrls: ['./game-component.scss'],
 })

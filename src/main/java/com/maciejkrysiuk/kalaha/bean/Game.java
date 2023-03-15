@@ -94,8 +94,11 @@ public class Game implements Comparable<Game> {
         if (!this.turn.equals(actor)) {
             throw new IllegalStateException("This move is not authorised.");
         }
-        if (!isOwnPod(sourcePod, actor) || sourcePod == getOwnBigPod(actor)) {
-            throw new IllegalArgumentException("This field cannot be moved.");
+        if (!isOwnPod(sourcePod, actor)) {
+            throw new IllegalArgumentException("Field " + sourcePod + " does not belong to " + actor);
+        }
+        if (sourcePod == getOwnBigPod(actor)) {
+            throw new IllegalArgumentException("Field " + sourcePod + " is big and cannot be moved.");
         }
 
         // The move
