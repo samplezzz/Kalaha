@@ -18,10 +18,10 @@
 </ng-container>
 
 <ng-template #player let-game="game" let-role="role">
-    <h2 [ngClass]="{ highligthed: game.turn == role }">
+    <h3 [ngClass]="{ highligthed: game.turn == role }">
         <span *ngIf="gameService.role == role">you</span>
         <span *ngIf="gameService.role != role">opponent</span>
-    </h2>
+    </h3>
 </ng-template>
 
 <ng-template #prompt let-game="game" let-role="role">

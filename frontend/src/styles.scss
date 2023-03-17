@@ -13,6 +13,24 @@ body {
     padding: 0;
 
     text-align: center;
+
+    &:before, &:after {
+        content: '';
+        height: 50vh;
+        position: absolute; left: 0;
+        width: 100vw;
+        z-index: -1;
+    }
+
+    &:before {
+        background-color: $color-theme-1;
+        top: 0;
+    }
+
+    &:after {
+        background-color: $color-theme-2;
+        bottom: 0;
+    }
 }
 
 .page {
@@ -25,6 +43,7 @@ body {
 }
 
 .half {
+    box-sizing: border-box;
     display: flex;
     flex-flow: column;
     height: 50vh;
@@ -33,12 +52,10 @@ body {
 }
 
 .top {
-    background-color: $color-theme-1;
     justify-content: flex-end;
 }
 
 .bottom {
-    background-color: $color-theme-2;
     justify-content: flex-start;
 }
 
@@ -47,7 +64,14 @@ h1 {
 }
 
 h2 {
+    font-size: 2em;
+    font-weight: 700;
     letter-spacing: 2px;
+}
+h3 {
+    font-size: 1.4em;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
 button {
