@@ -1,6 +1,5 @@
 <ng-container *ngIf="game$ | async as game">
     <div class="top half">
-        <p>-= {{ gameService.role }} =-</p>
         <ng-container *ngTemplateOutlet="prompt; context: { game, role: 'UP' }"></ng-container>
         <ng-container *ngTemplateOutlet="player; context: { game, role: 'UP' }"></ng-container>
         <div class="pods">

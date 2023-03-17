@@ -5,8 +5,10 @@ import {
     distinctUntilChanged,
     filter,
     Observable,
+    of,
     partition,
     pipe,
+    retry,
     skip,
     switchMap,
     Subject,
@@ -14,11 +16,10 @@ import {
     tap,
     timeout,
 } from 'rxjs';
+import * as Stomp from 'stompjs';
+import * as SockJS from 'sockjs-client';
 
 import { AppConfig, APP_CONFIG } from '../app-config';
-
-declare var SockJS: any;
-declare var Stomp: any;
 
 // TODO: Export to HTTP Interceptor
 const _ = {
@@ -43,21 +44,18 @@ export class GameService {
     public static readonly AWAIT_OPPONENT_MAXTIME = 1000 * 60 * 5;
     public static readonly POLLING_TIME = 3000;
 
-    private sock;
-    private stompClient;
+    role: PlayerRole | undefined;
 
     private stateGame$ = new BehaviorSubject<Game | undefined>(undefined);
     game$ = this.stateGame$.asObservable();
 
     private remoteGame$ = new Subject<Game>();
 
-    role: PlayerRole | undefined;
+    private sock: any;
+    private stompClient: any;
 
     constructor(@Inject(APP_CONFIG) private conf: AppConfig, private httpClient: HttpClient) {
-        this.sock = new SockJS(`${conf.backendUrl}/live`);
-        this.stompClient = Stomp.over(this.sock);
-
-        const [newGame$, gameOver$] = partition(
+        const [newGame$, gameOver$] = <[Observable<Game>, Observable<Game | undefined>]>partition(
             this.stateGame$.pipe(
                 skip(1),
                 distinctUntilChanged((previous, current) => previous?.code == current?.code)
@@ -65,7 +63,18 @@ export class GameService {
             (game) => !!game?.code
         );
 
-        newGame$.subscribe((game) => this.connectToGameLiveUpdates(game));
+        this.initWebSocket();
+
+        newGame$
+            .pipe(
+                switchMap((game) =>
+                    this.connectToGameLiveUpdates(game).pipe(
+                        timeout({ first: 3000, each: 1000 }),
+                        retry({ delay: () => this.initWebSocket(true) })
+                    )
+                )
+            )
+            .subscribe();
         gameOver$.subscribe(() => this.disconnectFromGameLiveUpdates());
     }
 
@@ -108,8 +117,8 @@ export class GameService {
         return this.remoteGame$.pipe(
             // TODO: check current game's last move sequence and, if incremented, trigger the game update
             filter((game) => game.turn == this.role),
-            tap((game) => console.log("Wait for opponent's move over", game)),
             take(1),
+            tap((game) => console.log("Finished waiting for the opponent's move:", game)),
             this.updateStateGame()
         );
     }
@@ -152,24 +161,47 @@ export class GameService {
             tap((game) => this.stateGame$.next(game))
         );
 
-    private connectToGameLiveUpdates(game: Game | undefined) {
-        if (game) {
-            console.warn('>>>>>>>>>> Connecting STOMP');
-            this.stompClient.connect({}, () => {
-                console.debug('Subscribing to LIVE updates of game', game?.code);
-                this.stompClient.subscribe(`/queue/game-${game?.code}`, (message: any) => {
-                    if (message.body) {
-                        try {
-                            const pushedGame = JSON.parse(message.body);
-                            console.debug('Game state PUSH:', pushedGame);
-                            this.remoteGame$.next(pushedGame);
-                        } catch (err) {
-                            this.remoteGame$.error(err);
-                        }
-                    }
-                });
-            });
+    private initWebSocket(retry?: boolean): Observable<boolean> {
+        if (retry) {
+            console.warn('>>>>>>>>>> Reinitializing STOP.');
+            try {
+                this.stompClient.disconnect();
+            } catch (e) {}
         }
+        this.sock = new SockJS(`${this.conf.backendUrl}/live`);
+        this.stompClient = Stomp.over(this.sock);
+        return of(true);
+    }
+
+    private connectToGameLiveUpdates(game: Game): Observable<void> {
+        const connected$: Observable<void> = new Observable((subscriber) => {
+            console.warn('>>>>>>>>>> Connecting STOMP', game);
+            this.stompClient.connect(
+                {},
+                () => {
+                    subscriber?.next();
+                    subscriber?.complete();
+                    console.debug('Connected to STOMP and subscribing to LIVE updates of game', game?.code);
+                    this.stompClient.subscribe(`/queue/game-${game?.code}`, (message: any) => {
+                        if (message.body) {
+                            try {
+                                const pushedGame = JSON.parse(message.body);
+                                console.debug('Remote game PUSH:', pushedGame);
+                                this.remoteGame$.next(pushedGame);
+                            } catch (err) {
+                                this.remoteGame$.error(err);
+                            }
+                        }
+                    });
+                },
+                (err: any) => {
+                    subscriber?.error();
+                    console.error('Could not connect to WebSocket', err);
+                }
+            );
+        });
+
+        return connected$;
     }
 
     private disconnectFromGameLiveUpdates() {

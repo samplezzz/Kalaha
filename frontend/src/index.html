@@ -13,8 +13,11 @@
         />
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
-        <script src="/assets/sockjs.js"></script>
-        <script src="/assets/stomp.js"></script>
+        <script>
+            if (global === undefined) {
+                var global = window;
+            }
+        </script>
     </head>
     <body>
         <ka-root></ka-root>
