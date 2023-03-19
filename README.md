@@ -1,29 +1,65 @@
 # Kalaha
 
-## Frontend
+This is an implementation of the technical assignment for a full stack developer role at [bol.com](http://bol.com)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.1.4.
+## Repository structure
 
-### Development server
+This repository consists of 2 projects:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+1. the backend, implemented with Java and Spring, ruled by `/pom.xml`
+2. the frontend, implemented with Angular, ruled by `/frontend/package.json`
 
-### Code scaffolding
+## How to run
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+To play the game, run both the backend and the frontend on your local machine.
 
-### Build
+### System requirements
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Before you type and hit the start commands, make sure your operating system has the following platforms & tooling installed. The versions given are versions used for implementing this software. If you already use lower minor versions on your machine, the software might still run. If it doesn't, try upgrading to at least the version given below.
 
-### Running unit tests
+1. JDK 17
+2. Maven 3.8.6
+3. Node 16.16.0
+4. Npm 8.11.0
+5. Chrome 110.0.5481.181
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### The steps
 
-### Running end-to-end tests
+1. Run `mvn spring-boot:run` in `/` to start the backend.
+2. Run `npm run start` in `/frontend` to start the frontend.
+3. Open [localhost:4200](http://localhost:4200/) in Chrome. The frontend will open and connect automatically to the backend running on `localhost:8080`.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Tests
 
-### Further help
+Both the backend and the frontend are covered with unit tests. You can run them as follows:
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+1. Run `mvn test` in `/` to execute the backend tests.
+2. Run `npm run test` in `/frontend` to execute the frontend tests.
+
+## Architectural overview
+
+The fundaments of this implementation's architecture are as follows:
+
+1. Players can play together each on their own machine, sharing the **state of the game** that exists on the server.
+    1. One player can create a new game in his own backend session and another player can join it by referencing it with the **game's `code`**.
+    2. Players share a game's `code` verbally or via any messaging app (like WhatsApp).
+2. A player can **make a move**, changing the state of the game, by firing a REST API move request to the server.
+    1. The server updates a game's state with a move according to the game rules that the **server is owner** of.
+    2. The **frontend only presents** a game's state to the users and does not manage any game logic.
+3. Both players are notified by the server about the game's state change via a **Web Socket live connection**.
+
+## Other considerations
+
+### Additional test coverage
+
+Unit tests that exist in this implementation are exemplary and they demonstrate how I design uni tests both on the frontend and the backend. More unit tests, covering more cases and classes, would be needed in a final solution.
+
+### Web Socket reliability
+
+I have used the Web Sockets technology for the implementation of this game because it ideally fits the requirements allowing players to immediately see moves of the opponent and it avoids overloading network and server activity with superfluous polling.
+
+However, the implementation of the Web Socket that I ended up using turned out to be unstable, that is the frontend occassionally does not make a successfull connection with the server and keeps on hanging.
+
+A temporary solution for this problem, that I have implemented, is to retry the connection upon failure. In practise the connection succeeds after the first retry and makes it possible to play the game. In regular business circumstances I would use this temporary solution, as in the presentation of this assignment, to demo the game to the stakeholders and allow them to express feedback on the functionality. I would communicate this technical debt and work on resolving it in the following sprints.
+
+To achieve a stable and proper final implementation, I would change Spring Web Socket configuration to communicate over `ws://` instead of `http://` protocol and I would change frontend's Web Socket library to [@stomp/stompjs](https://www.npmjs.com/package/@stomp/stompjs), which does not allow `http://` and cannot be used with the current implementation.
