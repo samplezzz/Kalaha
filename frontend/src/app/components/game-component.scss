@@ -20,28 +20,42 @@ td {
 
     .top & {
         align-items: flex-start;
-        transform: translateX(calc(-20px - .5em));
+        transform: translateX(calc(-6.75vw + 2px));
+
+        @media (min-width: 450px)  {
+            transform: translateX(-29px);
+        }
     }
 
     .bottom & {
         align-items: flex-end;
-        transform: translateX(calc(20px + .5em));
+        transform: translateX(calc(6.75vw - 2px));
+
+        @media (min-width: 450px)  {
+            transform: translateX(29px);
+        }
     }
 
     .pod {
         background: white;
+        box-sizing: border-box;
         border-radius: 20px;
         color: black;
         cursor: not-allowed;
         display: inline-flex;
         height: 70px;
-        margin: 0 .5em;
-        width: 45px;
+        margin: 0 4px;
+        width: calc(12.5vw - 2 * 4px);
 
         align-items: center;
         justify-content: center;
 
         transition: .1s ease-in-out;
+
+        @media (min-width: 450px)  {
+            margin: 0 6px;
+            width: 45px;
+        }
 
         &.actionable {
             cursor: pointer;
