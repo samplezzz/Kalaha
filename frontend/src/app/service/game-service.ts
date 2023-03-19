@@ -16,10 +16,9 @@ import {
     tap,
     timeout,
 } from 'rxjs';
-import * as Stomp from 'stompjs';
-import * as SockJS from 'sockjs-client';
 
 import { AppConfig, APP_CONFIG } from '../app-config';
+import { WEB_SOCKET_CLIENT_FACTORY, WebSocketInitializer } from '../integration/web-socket.client';
 
 // TODO: Export to HTTP Interceptor
 const _ = {
@@ -51,10 +50,13 @@ export class GameService {
 
     private remoteGame$ = new Subject<Game>();
 
-    private sock: any;
     private stompClient: any;
 
-    constructor(@Inject(APP_CONFIG) private conf: AppConfig, private httpClient: HttpClient) {
+    constructor(
+        @Inject(APP_CONFIG) private conf: AppConfig,
+        private httpClient: HttpClient,
+        @Inject(WEB_SOCKET_CLIENT_FACTORY) private initWebSocket: WebSocketInitializer
+    ) {
         const [newGame$, gameOver$] = <[Observable<Game>, Observable<Game | undefined>]>partition(
             this.stateGame$.pipe(
                 skip(1),
@@ -63,14 +65,14 @@ export class GameService {
             (game) => !!game?.code
         );
 
-        this.initWebSocket();
+        this.stompClient = this.initWebSocket();
 
         newGame$
             .pipe(
                 switchMap((game) =>
                     this.connectToGameLiveUpdates(game).pipe(
                         timeout({ first: 3000, each: 1000 }),
-                        retry({ delay: () => this.initWebSocket(true) })
+                        retry({ delay: () => of((this.stompClient = this.initWebSocket())) })
                     )
                 )
             )
@@ -160,18 +162,6 @@ export class GameService {
             tap((game: Game) => console.debug('Game state update', game)),
             tap((game) => this.stateGame$.next(game))
         );
-
-    private initWebSocket(retry?: boolean): Observable<boolean> {
-        if (retry) {
-            console.warn('>>>>>>>>>> Reinitializing STOP.');
-            try {
-                this.stompClient.disconnect();
-            } catch (e) {}
-        }
-        this.sock = new SockJS(`${this.conf.backendUrl}/live`);
-        this.stompClient = Stomp.over(this.sock);
-        return of(true);
-    }
 
     private connectToGameLiveUpdates(game: Game): Observable<void> {
         const connected$: Observable<void> = new Observable((subscriber) => {
