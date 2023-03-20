@@ -17,7 +17,7 @@ To play the game, run both the backend and the frontend on your local machine.
 
 ### System requirements
 
-Before you type and hit the start commands, make sure your operating system has the following platforms & tooling installed. The versions given are versions used for implementing this software. If you already use lower minor versions on your machine, the software might still run. If it doesn't, try upgrading to at least the version given below.
+Before you type and hit the start commands, make sure your operating system has the following platforms & tooling installed. The versions given are versions used for this implementation. If you already use lower minor versions on your machine, the game might still run. If it doesn't, try upgrading to at least the version given below.
 
 1. JDK 17
 2. Maven 3.8.6
