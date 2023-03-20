@@ -1,13 +1,15 @@
 # Kalaha
 
-This is an implementation of the technical assignment for a full stack developer role at [bol.com](http://bol.com)
+This is an implementation of the technical assignment for a full stack developer role at [bol.com](http://bol.com). See the **rules of the game** in [this YouTube video](https://www.youtube.com/watch?v=F402u46ZTeM).
+
+![](screenshot.png)
 
 ## Repository structure
 
 This repository consists of 2 projects:
 
 1. the backend, implemented with Java and Spring, ruled by `/pom.xml`
-2. the frontend, implemented with Angular, ruled by `/frontend/package.json`
+2. the frontend, implemented with Angular, ruled by `/frontend/.package.json`
 
 ## How to run
 
