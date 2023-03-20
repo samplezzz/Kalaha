@@ -2,15 +2,21 @@ package com.maciejkrysiuk.kalaha.bean;
 
 import static com.maciejkrysiuk.kalaha.type.PlayerRole.DOWN;
 import static com.maciejkrysiuk.kalaha.type.PlayerRole.UP;
+import static com.maciejkrysiuk.kalaha.type.PlayerRole.oppositeRole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import com.maciejkrysiuk.kalaha.type.GameStatus;
 import com.maciejkrysiuk.kalaha.type.PlayerRole;
 
 /**
+ * Represents a game state
+ * and implements the game rules logic.
  * 
  */
 public class Game implements Comparable<Game> {
@@ -18,17 +24,22 @@ public class Game implements Comparable<Game> {
     private final int FIELD_SIZE = 14;
     private final int DOWN_BIG_POD_INDEX = 6;
     private final int UP_BIG_POD_INDEX = 13;
-
     private final int INITIAL_BEANS_PER_POD = 6;
 
-    private String code;
-    private int[] pods;
+    private final Map<PlayerRole, int[]> PLAYER_ACTIONABLE_PODS = Collections
+            .unmodifiableMap(Map.of(DOWN, IntStream.rangeClosed(0, 5).toArray(), UP,
+                    IntStream.rangeClosed(7, 12).toArray()));
 
-    private GameStatus status;
-    private PlayerRole turn;
+    protected String code;
+    protected int[] pods;
+
+    protected GameStatus status;
+    protected PlayerRole turn;
 
     public Game(String code) {
-        // TODO: Add assertion for not null.
+        if (code == null || code.trim().equals("")) {
+            throw new IllegalArgumentException("Game's code cannot be null or empty.");
+        }
         this.code = code;
 
         this.pods = new int[FIELD_SIZE];
@@ -74,7 +85,6 @@ public class Game implements Comparable<Game> {
 
     @Override
     public boolean equals(Object other) {
-        // TODO: Check if this gets nicer in JDK17
         return other instanceof Game && ((Game) other).getCode().equals(this.code);
     }
 
@@ -130,6 +140,8 @@ public class Game implements Comparable<Game> {
             this.pods[getOwnBigPod(actor)] += bonusMovedBeans;
         }
 
+        checkForGameOver(actor);
+
         return nextPlayer;
     }
 
@@ -183,5 +195,20 @@ public class Game implements Comparable<Game> {
 
     private int nextPod(int podIndex) {
         return (podIndex + 1) % FIELD_SIZE;
+    }
+
+    private void checkForGameOver(PlayerRole actor) {
+        final int playerRemainingBeansCount = IntStream.of(PLAYER_ACTIONABLE_PODS.get(actor)).reduce(0,
+                (subtotal, pod) -> subtotal + this.pods[pod]);
+
+        if (playerRemainingBeansCount == 0) {
+            // Move remaining opponent's beans.
+            final PlayerRole opponent = oppositeRole(actor);
+            this.pods[this.getOwnBigPod(opponent)] += this.removeBeans(PLAYER_ACTIONABLE_PODS.get(opponent));
+
+            // Mark the state of the game
+            this.status = GameStatus.FINISHED;
+            this.turn = null;
+        }
     }
 }

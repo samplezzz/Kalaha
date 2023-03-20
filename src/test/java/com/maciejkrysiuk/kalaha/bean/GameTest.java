@@ -11,6 +11,8 @@ import static com.maciejkrysiuk.kalaha.type.PlayerRole.UP;
 
 import org.junit.jupiter.api.Test;
 
+import com.maciejkrysiuk.kalaha.type.GameStatus;
+
 public class GameTest {
 
     private Game game;
@@ -58,5 +60,16 @@ public class GameTest {
             fail("Illegal source pod should throw a move exception.");
         } catch (Exception e) {
         }
+    }
+
+    @Test
+    void endGame() {
+        game.pods = new int[] { 0, 0, 0, 0, 0, 1, 49, 0, 0, 0, 2, 1, 0, 20 };
+        game.status = GameStatus.PLAYING;
+
+        game.move(5, DOWN);
+
+        assertArrayEquals(game.getPods(), new int[] { 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 23 });
+        assertEquals(game.status, GameStatus.FINISHED);
     }
 }

@@ -23,7 +23,7 @@ public class PlaygroundService {
 
     public static int GAME_CODE_LENGTH = 6;
 
-    private SortedMap<String, Game> newGames = Collections.synchronizedSortedMap(new TreeMap<>());
+    protected SortedMap<String, Game> newGames = Collections.synchronizedSortedMap(new TreeMap<>());
 
     public Game createNewGame() {
         final Game newGame = new Game(RandomStringUtils.randomAlphanumeric(GAME_CODE_LENGTH).toUpperCase());

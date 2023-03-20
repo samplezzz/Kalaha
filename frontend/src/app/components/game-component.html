@@ -1,5 +1,6 @@
 <ng-container *ngIf="game$ | async as game">
     <div class="top half">
+        <p *ngIf="game.status == 'FINISHED'">GAME OVER</p>
         <ng-container *ngTemplateOutlet="prompt; context: { game, role: 'UP' }"></ng-container>
         <ng-container *ngTemplateOutlet="player; context: { game, role: 'UP' }"></ng-container>
         <div class="pods">
@@ -25,11 +26,13 @@
 </ng-template>
 
 <ng-template #prompt let-game="game" let-role="role">
-    <p *ngIf="gameService.role == role" class="pulsate">
-        <ng-container *ngIf="game.turn == gameService.role">it's your turn!</ng-container>
-        <ng-container *ngIf="game.turn != gameService.role">wait for opponents move...</ng-container><br />
-        <br />
-    </p>
+    <ng-container *ngIf="game.status == 'PLAYING'">
+        <p *ngIf="gameService.role == role" class="pulsate">
+            <ng-container *ngIf="game.turn == gameService.role">it's your turn!</ng-container>
+            <ng-container *ngIf="game.turn != gameService.role">wait for opponents move...</ng-container><br />
+            <br />
+        </p>
+    </ng-container>
 </ng-template>
 
 <ng-template #pods let-game="game" let-pods="pods" let-role="role">
