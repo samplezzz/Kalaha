@@ -30,6 +30,11 @@ Before you type and hit the start commands, make sure your operating system has 
 1. Run `mvn spring-boot:run` in `/` to start the backend.
 2. Run `npm run start` in `/frontend` to start the frontend.
 3. Open [localhost:4200](http://localhost:4200/) in Chrome. The frontend will open and connect automatically to the backend running on `localhost:8080`.
+4. Open [localhost:4200](http://localhost:4200/) in another browser or different user profile in Chrome.
+5. Connect the 2 players:
+    1. Click _Start game_ in the first browser and copy the game code.
+    2. Click _Join game_ in the second browser and paste the code. Click 'Go'.
+6. Now you can play!
 
 ## Tests
 
