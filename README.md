@@ -54,7 +54,7 @@ The fundaments of this implementation's architecture are as follows:
 
 ### Additional test coverage
 
-Unit tests that exist in this implementation are exemplary and they demonstrate how I design uni tests both on the frontend and the backend. More unit tests, covering more cases and classes, would be needed in a final solution.
+Unit tests that exist in this implementation are exemplary and they demonstrate how I design unit tests both on the frontend and the backend. More unit tests, covering more cases and classes, would be needed in a final solution.
 
 ### Web Socket reliability
 
@@ -62,6 +62,6 @@ I have used the Web Sockets technology for the implementation of this game becau
 
 However, the implementation of the Web Socket that I ended up using turned out to be unstable, that is the frontend occassionally does not make a successfull connection with the server and keeps on hanging.
 
-A temporary solution for this problem, that I have implemented, is to retry the connection upon failure. In practise the connection succeeds after the first retry and makes it possible to play the game. In regular business circumstances I would use this temporary solution, as in the presentation of this assignment, to demo the game to the stakeholders and allow them to express feedback on the functionality. I would communicate this technical debt and work on resolving it in the following sprints.
+A temporary solution for this problem, that I have implemented, is to retry the connection upon failure. In practise the connection succeeds after the first retry and makes it possible to play the game. In regular business circumstances I would use this temporary solution, as in the presentation of this assignment, to demo the game to the stakeholders and allow them to express feedback on the functionality. I would communicate this technical debt and work on resolving it in following sprints.
 
 To achieve a stable and proper final implementation, I would change Spring Web Socket configuration to communicate over `ws://` instead of `http://` protocol and I would change frontend's Web Socket library to [@stomp/stompjs](https://www.npmjs.com/package/@stomp/stompjs), which does not allow `http://` and cannot be used with the current implementation.
