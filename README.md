@@ -33,7 +33,7 @@ Before you type and hit the start commands, make sure your operating system has 
 4. Open [localhost:4200](http://localhost:4200/) in another browser or different user profile in Chrome.
 5. Connect the 2 players:
     1. Click _Start game_ in the first browser and copy the game code.
-    2. Click _Join game_ in the second browser and paste the code. Click 'Go'.
+    2. Click _Join game_ in the second browser and paste the code. Click _Go_.
 6. Now you can play!
 
 ## Tests
