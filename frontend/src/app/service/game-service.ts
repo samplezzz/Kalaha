@@ -16,6 +16,7 @@ import {
     tap,
     timeout,
 } from 'rxjs';
+import { Client, Message } from 'stompjs';
 
 import { AppConfig, APP_CONFIG } from '../app-config';
 import { WEB_SOCKET_CLIENT_FACTORY, WebSocketInitializer } from '../integration/web-socket.client';
@@ -47,16 +48,16 @@ export class GameService {
 
     private stateGame$ = new BehaviorSubject<Game | undefined>(undefined);
     game$ = this.stateGame$.asObservable();
-
+    private stompClient: Client;
     private remoteGame$ = new Subject<Game>();
-
-    private stompClient: any;
 
     constructor(
         @Inject(APP_CONFIG) private conf: AppConfig,
         private httpClient: HttpClient,
         @Inject(WEB_SOCKET_CLIENT_FACTORY) private initWebSocket: WebSocketInitializer
     ) {
+        this.stompClient = this.initWebSocket();
+
         const [newGame$, gameOver$] = <[Observable<Game>, Observable<Game | undefined>]>partition(
             this.stateGame$.pipe(
                 skip(1),
@@ -64,8 +65,6 @@ export class GameService {
             ),
             (game) => !!game?.code
         );
-
-        this.stompClient = this.initWebSocket();
 
         newGame$
             .pipe(
@@ -77,6 +76,7 @@ export class GameService {
                 )
             )
             .subscribe();
+
         gameOver$.subscribe(() => this.disconnectFromGameLiveUpdates());
     }
 
@@ -117,10 +117,8 @@ export class GameService {
 
     waitForMove() {
         return this.remoteGame$.pipe(
-            // TODO: check current game's last move sequence and, if incremented, trigger the game update
             filter((game) => game.turn == this.role),
             take(1),
-            tap((game) => console.log("Finished waiting for the opponent's move:", game)),
             this.updateStateGame()
         );
     }
@@ -130,26 +128,14 @@ export class GameService {
      *
      * Initializes {@link GameService#role} to the value from a param.
      */
-    private initStateRoleWith = <T>(role: PlayerRole) =>
-        pipe(
-            tap((input: T) => {
-                console.warn('Initializing role with', role);
-                this.role = role;
-            })
-        );
+    private initStateRoleWith = <T>(role: PlayerRole) => pipe(tap((input: T) => (this.role = role)));
 
     /**
      * Helper pipeable operator:
      *
      * Initializes {@link GameService#role} to the value from an event from input observable.
      */
-    private initStateRole = () =>
-        pipe(
-            tap((role: PlayerRole) => {
-                console.warn('Initializing role with', role);
-                this.role = role;
-            })
-        );
+    private initStateRole = () => pipe(tap((role: PlayerRole) => (this.role = role)));
 
     /**
      * Helper pipeable operator:
@@ -171,13 +157,10 @@ export class GameService {
                 () => {
                     subscriber?.next();
                     subscriber?.complete();
-                    console.debug('Connected to STOMP and subscribing to LIVE updates of game', game?.code);
-                    this.stompClient.subscribe(`/queue/game-${game?.code}`, (message: any) => {
+                    this.stompClient.subscribe(`/queue/game-${game?.code}`, (message: Message) => {
                         if (message.body) {
                             try {
-                                const pushedGame = JSON.parse(message.body);
-                                console.debug('Remote game PUSH:', pushedGame);
-                                this.remoteGame$.next(pushedGame);
+                                this.remoteGame$.next(JSON.parse(message.body));
                             } catch (err) {
                                 this.remoteGame$.error(err);
                             }
@@ -196,6 +179,6 @@ export class GameService {
 
     private disconnectFromGameLiveUpdates() {
         console.warn('<<<<<<<<<< Disconnecting STOMP');
-        this.stompClient.disconnect();
+        this.stompClient.disconnect(() => {});
     }
 }
