@@ -42,7 +42,6 @@ export type Game = {
 })
 export class GameService {
     public static readonly AWAIT_OPPONENT_MAXTIME = 1000 * 60 * 5;
-    public static readonly POLLING_TIME = 3000;
 
     role: PlayerRole | undefined;
 
