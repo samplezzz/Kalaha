@@ -35,12 +35,11 @@ public class GameController {
     /**
      * Returns a complete object of a {@link Game} played by the requester.
      * 
-     * @param code The code of the requested game.
      * @return Payload of the requester's {@link Game}.
      */
     @GetMapping("")
     public Game getGame() {
-        return assertUserIsPlaying().session.getPlayedGame();
+        return assertUserIsPlaying().getPlayedGame();
     }
 
     /**
@@ -51,7 +50,7 @@ public class GameController {
      */
     @GetMapping("/role")
     public PlayerRole getGameRole() {
-        return assertUserIsPlaying().session.getGameRole();
+        return assertUserIsPlaying().getGameRole();
     }
 
     /**
@@ -71,10 +70,10 @@ public class GameController {
         return updatedGame;
     }
 
-    private GameController assertUserIsPlaying() {
+    private UserSession assertUserIsPlaying() {
         if (!this.session.isPlayingGame()) {
             throw NO_PLAYING_GAME_EXC;
         }
-        return this;
+        return this.session;
     }
 }
