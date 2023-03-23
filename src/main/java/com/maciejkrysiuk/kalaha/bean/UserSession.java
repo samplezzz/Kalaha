@@ -1,5 +1,8 @@
 package com.maciejkrysiuk.kalaha.bean;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -7,6 +10,8 @@ import org.springframework.stereotype.Component;
 import com.maciejkrysiuk.kalaha.type.PlayerRole;
 
 /**
+ * A service that just wraps user's {@link Game} in session
+ * and associates user's {@link PlayerRole} with it.
  * 
  */
 @Component
@@ -15,6 +20,10 @@ public class UserSession {
 
     private PlayerRole gameRole;
     private Game playedGame;
+
+    /*
+     * Getters & setters
+     */
 
     public PlayerRole getGameRole() {
         return gameRole;
@@ -41,11 +50,12 @@ public class UserSession {
     }
 
     public boolean isPlayingGameWithCode(String code) {
-        // TODO: Check if there's a shorter check in JDK17
-        return code != null && code.trim().equals("") && code.equals(this.playedGame.getCode());
+        return this.playedGame != null && Objects.equals(this.playedGame.getCode(), code);
     }
 
     public Game move(int field) {
-        return this.playedGame.move(field, this.gameRole);
+        return Optional.of(this.playedGame)
+                .orElseThrow(() -> new IllegalStateException("Cannot make a move because no game exists in session."))
+                .move(field, this.gameRole);
     }
 }
