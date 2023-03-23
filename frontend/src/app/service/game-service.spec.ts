@@ -26,7 +26,12 @@ describe('GameService', () => {
         spyHttpClient = jasmine.createSpyObj<HttpClient>('HttpClient', ['get', 'post', 'put']);
         spyHttpClient.post.and.returnValue(mockCreatedGame$);
 
-        spyWebSocketClient = jasmine.createSpyObj<Client>('WebSocketClient', ['subscribe']);
+        spyWebSocketClient = jasmine.createSpyObj<Client>('WebSocketClient', ['connect', 'disconnect', 'subscribe']);
+        spyWebSocketClient.connect.and.callFake((headers, connectCallback, errorCallback) => {
+            if (connectCallback instanceof Function) {
+                connectCallback();
+            }
+        });
         spyWebSocketClient.subscribe.and.callFake((destination, callback) => {
             let sub = mockRemoteGame$.subscribe((game) => (callback ? callback(mockMessage(game)) : null));
             return {
@@ -47,6 +52,20 @@ describe('GameService', () => {
 
     it('should instantiate the service', () => {
         expect(service).toBeDefined();
+    });
+
+    it('should initialize Web Socket connection but not subscribe until a new game is present', () => {
+        expect(spyWebSocketInitializer).toHaveBeenCalled();
+        expect(spyHttpClient.post).not.toHaveBeenCalled();
+
+        service.createNewGame().subscribe();
+
+        expect(spyHttpClient.post).toHaveBeenCalledOnceWith(`http://mockhost:7777/user/start`, {}, jasmine.any(Object));
+        expect(spyWebSocketClient.subscribe).not.toHaveBeenCalled();
+
+        mockCreatedGame$.next({ code: 'CREATED-GAME', pods: [], status: 'PLAYING', turn: 'DOWN' });
+
+        expect(spyWebSocketClient.subscribe).toHaveBeenCalledWith(`/queue/game-CREATED-GAME`, jasmine.any(Function));
     });
 });
 
