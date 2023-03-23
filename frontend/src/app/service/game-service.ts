@@ -70,6 +70,9 @@ export class GameService {
                 switchMap((game) =>
                     this.connectToGameLiveUpdates(game).pipe(
                         timeout({ first: 3000, each: 1000 }),
+                        // The used WebSocket implementation can occasionally not connect and hang,
+                        // reinitializing the socket solves temporarily the problem.
+                        // See full description of the issue see {@link https://github.com/samplezzz/Kalaha#web-socket-reliability}.
                         retry({ delay: () => of((this.stompClient = this.initWebSocket())) })
                     )
                 )
@@ -90,6 +93,11 @@ export class GameService {
         );
     }
 
+    /**
+     * In case backend game state does exist and frontend game state not
+     * (this can happen after a page refresh),
+     * this method checks the backend game state and copies it to the frontend.
+     */
     continueRemoteGame(): Observable<Game> {
         return this.httpClient.get<PlayerRole>(`${this.conf.backendUrl}/game/role`, _).pipe(
             this.initStateRole(),
@@ -114,6 +122,9 @@ export class GameService {
             .pipe(this.updateStateGame());
     }
 
+    /**
+     * @returns An observable that notifies when it's current user's turn.
+     */
     waitForMove() {
         return this.remoteGame$.pipe(
             filter((game) => game.turn == this.role),
@@ -125,28 +136,23 @@ export class GameService {
     /**
      * Helper pipeable operator:
      *
-     * Initializes {@link GameService#role} to the value from a param.
+     * Initializes this {@link GameService#role} to the value from a param.
      */
     private initStateRoleWith = <T>(role: PlayerRole) => pipe(tap((input: T) => (this.role = role)));
 
     /**
      * Helper pipeable operator:
      *
-     * Initializes {@link GameService#role} to the value from an event from input observable.
+     * Initializes this {@link GameService#role} to the value from an event from input observable.
      */
     private initStateRole = () => pipe(tap((role: PlayerRole) => (this.role = role)));
 
     /**
      * Helper pipeable operator:
      *
-     * Updates {@link GameService}'s {@link Game} state from the observable input
-     * or, if the input is empty, fetches the current game from API endpoint.
+     * Updates this {@link GameService}'s {@link Game} state from the observable input.
      */
-    private updateStateGame = () =>
-        pipe(
-            tap((game: Game) => console.debug('Game state update', game)),
-            tap((game) => this.stateGame$.next(game))
-        );
+    private updateStateGame = () => pipe(tap((game: Game) => this.stateGame$.next(game)));
 
     private connectToGameLiveUpdates(game: Game): Observable<void> {
         const connected$: Observable<void> = new Observable((subscriber) => {
@@ -167,8 +173,8 @@ export class GameService {
                     });
                 },
                 (err: any) => {
+                    console.error('Could not connect STOMP', err);
                     subscriber?.error();
-                    console.error('Could not connect to WebSocket', err);
                 }
             );
         });
