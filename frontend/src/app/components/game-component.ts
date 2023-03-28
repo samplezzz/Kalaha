@@ -26,7 +26,7 @@ export class GameComponent implements OnInit {
     move(field: number) {
         this.gameService
             .move(field)
-            .pipe(switchMap(() => this.gameService.waitForMove()))
+            .pipe(switchMap(() => this.gameService.waitForOwnTurn()))
             .subscribe(() => {});
     }
 
@@ -35,7 +35,7 @@ export class GameComponent implements OnInit {
         this.game$
             .pipe(
                 first(),
-                switchMap((game) => (game.turn != this.gameService.role ? this.gameService.waitForMove() : EMPTY))
+                switchMap((game) => (game.turn != this.gameService.role ? this.gameService.waitForOwnTurn() : EMPTY))
             )
             .subscribe(() => {});
     }

@@ -125,7 +125,7 @@ export class GameService {
     /**
      * @returns An observable that notifies when it's current user's turn.
      */
-    waitForMove() {
+    waitForOwnTurn() {
         return this.remoteGame$.pipe(
             filter((game) => game.turn == this.role),
             take(1),
